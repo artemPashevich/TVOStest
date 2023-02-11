@@ -11,9 +11,12 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        
+        SocketManager.shared.postClientLogin(login: "test@crocott.com", password: "1111") { result, error in
+            print(result.access_token)
+            print(result.refresh_token)
+        }
     }
-
 
 }
 
