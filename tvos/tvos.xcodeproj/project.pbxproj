@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A53FF70929997E7E005BCC70 /* ChanelsStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53FF70829997E7E005BCC70 /* ChanelsStruct.swift */; };
 		A54A103A299857AE00EC7738 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A1039299857AE00EC7738 /* AppDelegate.swift */; };
 		A54A103C299857AE00EC7738 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A103B299857AE00EC7738 /* ViewController.swift */; };
 		A54A103F299857AE00EC7738 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A54A103D299857AE00EC7738 /* Main.storyboard */; };
@@ -39,6 +40,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A53FF70829997E7E005BCC70 /* ChanelsStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChanelsStruct.swift; sourceTree = "<group>"; };
 		A54A1036299857AE00EC7738 /* tvos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = tvos.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A54A1039299857AE00EC7738 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A54A103B299857AE00EC7738 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -106,6 +108,7 @@
 			children = (
 				A54A1039299857AE00EC7738 /* AppDelegate.swift */,
 				A54A1068299857E000EC7738 /* struct.swift */,
+				A53FF70829997E7E005BCC70 /* ChanelsStruct.swift */,
 				A54A1066299857D600EC7738 /* base.swift */,
 				A54A103B299857AE00EC7738 /* ViewController.swift */,
 				A54A103D299857AE00EC7738 /* Main.storyboard */,
@@ -271,6 +274,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A53FF70929997E7E005BCC70 /* ChanelsStruct.swift in Sources */,
 				A54A1069299857E000EC7738 /* struct.swift in Sources */,
 				A54A103C299857AE00EC7738 /* ViewController.swift in Sources */,
 				A54A103A299857AE00EC7738 /* AppDelegate.swift in Sources */,

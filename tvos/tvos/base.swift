@@ -170,14 +170,25 @@ class SocketManager {
     }
     
     
+    func clientGetContent(login: String, password: String, refresh_token: String, completion: @escaping (Tokens?) -> Void) {
+        
+        let url = URL(string: SocketManager.getBackendEndpoint + "/client/content")
+        
+    }
+    
+    
+    
+    
+    
     func _getHeaders() -> [String: String] {
-        var headers = [String: String]()
+        var headers: [String: String] = [:]
         if let tokens = _tokens {
-//            headers[HttpHeaders.authorizationHeader] = "Bearer \(tokens.access)"
-
+            headers["Authorization"] = "Bearer \(tokens.access_token)"
         }
         return headers
     }
+    
+    
     
 //    func login(id: String, name: String, login: String, password: String) {
 //
