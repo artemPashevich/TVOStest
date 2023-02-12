@@ -22,7 +22,7 @@ class SocketManager {
     
     static let shared = SocketManager()
     
-   private init(onTokenChanged: ((Tokens) -> Void)? = nil, onNeedHelp: (() -> Void)? = nil) {
+    private init(onTokenChanged: ((Tokens) -> Void)? = nil, onNeedHelp: (() -> Void)? = nil) {
         self.onTokenChanged = onTokenChanged
         self.onNeedHelp = onNeedHelp
     }
@@ -72,30 +72,32 @@ class SocketManager {
         let url = URL(string: SocketManager.getBackendEndpoint + "/client/login")
         
         addDevice(login: login, password: password, name: "TV OS") { device in
-        let encodeBody = self._info(id: "63e544a32a3b9920437dc9d8" , name: "TV OS")
-        let data = try? JSONEncoder().encode(encodeBody)
-        let parameters = try? (JSONSerialization.jsonObject(with: data!, options: []) as! [String: Any])
-        
+            
+            let encodeBody = self._info(id: "63e544a32a3b9920437dc9d8" , name: "TV OS")
+            let data = try? JSONEncoder().encode(encodeBody)
+            let parameters = try? (JSONSerialization.jsonObject(with: data!, options: []) as! [String: Any])
+            
 
-        AF.request(url!, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: HTTPHeaders(self.generateJsonHeaders(login: login, password: password)))
-                .responseData { response in
-                    switch response.result {
-                    case .success(let data):
-                        
-                        do {
-                            let tokenJson = try JSONDecoder().decode(DataTokens.self, from: data)
-                            let token = tokenJson.data
-                            self.setTokens(tokens: token)
-                            callback(token, nil)
-                        } catch {
+            AF.request(url!, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: HTTPHeaders(self.generateJsonHeaders(login: login, password: password)))
+                    .responseData { response in
+                        switch response.result {
+                        case .success(let data):
+                            
+                            do {
+                                let tokenJson = try JSONDecoder().decode(DataTokens.self, from: data)
+                                let token = tokenJson.data
+                                self.setTokens(tokens: token)
+                                callback(token, nil)
+                            } catch {
+                                print(error)
+    //                            callback(nil, nil)
+                            }
+                        case .failure(let error):
                             print(error)
-//                            callback(nil, nil)
+                            //
+                            break
                         }
-                    case .failure(let error):
-                        print(error)
-                        break
                     }
-                }
         }
     }
     
@@ -134,13 +136,13 @@ class SocketManager {
     }
     
     
-    func updateAccessToken(login: String, password: String, refresh_token: Tokens) -> Tokens? {
+    func updateAccessToken(login: String, password: String, refresh_token: String, completion: @escaping (Tokens?) -> Void) {
         
         let url = URL(string: SocketManager.getBackendEndpoint + "/client/refresh_token")
         let headers = generateJsonHeaders(login: login, password: password)
         let refresh_token = _tokens?.refresh_token
         if refresh_token == nil {
-            return nil
+            // error
         }
         let body = ["refresh_token": refresh_token]
         
@@ -150,20 +152,20 @@ class SocketManager {
                 case .success(let data):
 
                     do {
-                        let decodeTokens = try JSONDecoder().decode(Tokens.self, from: data)
-                        let tokens = decodeTokens._tokens?.access_token
-                        
+                        let decodeTokens = try JSONDecoder().decode(DataTokens.self, from: data)
+                        print(decodeTokens.data.access_token)
+                        self._setTokens(tokens: decodeTokens.data)
+                        completion(decodeTokens.data)
                         
                     } catch {
                         print(error)
-                        
+                        // compl
                     }
                     
                 case .failure(let error):
                     print(error)
-                    
+                   // compl
                 }
-                
             }
     }
     
@@ -172,6 +174,7 @@ class SocketManager {
         var headers = [String: String]()
         if let tokens = _tokens {
 //            headers[HttpHeaders.authorizationHeader] = "Bearer \(tokens.access)"
+
         }
         return headers
     }

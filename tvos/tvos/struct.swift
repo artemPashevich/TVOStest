@@ -8,7 +8,7 @@
 import Foundation
 
 struct DataTokens: Codable {
-    var data: Tokens
+    let data: Tokens
 }
 
 struct Project: Codable {
@@ -68,8 +68,7 @@ struct Device: Codable {
     var device: DeviceInfo
 }
 
-
-class Tokens: Codable {
+struct Tokens: Codable {
     
     static let accessToken = "access_token"
     static let refreshToken = "refresh_token"
