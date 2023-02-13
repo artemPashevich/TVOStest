@@ -170,9 +170,30 @@ class SocketManager {
     }
     
     
-    func clientGetContent(login: String, password: String, refresh_token: String, completion: @escaping (Tokens?) -> Void) {
+    func clientGetContent(completion: @escaping (JSON?) -> Void) {
         
         let url = URL(string: SocketManager.getBackendEndpoint + "/client/content")
+        AF.request(url!, method: .get, headers: HTTPHeaders(_getHeaders()))
+            .responseData { response in
+                switch response.result {
+                case .success(let data):
+
+                    do {
+                        let json = try JSON(data: data)
+//                        let decodeContent = try JSONDecoder().decode(JSON.self, from: data)
+                        print(data)
+                        completion(json)
+                        
+                    } catch {
+                        print(error)
+                        // compl
+                    }
+                    
+                case .failure(let error):
+                    print(error)
+                   // compl
+                }
+            }
         
     }
     

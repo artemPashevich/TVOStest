@@ -7,28 +7,19 @@
 
 import Foundation
 
-struct PackageResponse: Decodable {
-    let data: PackageData
-}
-
-struct PackageData: Decodable {
-    let packages: [Package]
-    let playlists: [Playlist]
-}
-
 struct Package: Decodable {
     let id: String
     let name: String
     let streams: [Stream]
-    let vods: [Vod]
-    let episodes: [Episode]
-    let seasons: [Season]
-    let serials: [Serial]
+    let vods: [String]
+    let episodes: [String]
+    let seasons: [String]
+    let serials: [String]
     let description: String
-    let backgroundURL: String
+    let backgroundUrl: String
     let available: Bool
     
-    private enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case id
         case name
         case streams
@@ -37,18 +28,18 @@ struct Package: Decodable {
         case seasons
         case serials
         case description
-        case backgroundURL = "background_url"
+        case backgroundUrl = "background_url"
         case available
     }
 }
 
 struct Stream: Decodable {
     let id: String
-    let groups: [Group]
+    let groups: [String]
     let iarc: Int
-    let parts: [Part]
+    let parts: [String]
     let viewCount: Int
-    let meta: [Meta]
+    let meta: [String]
     let createdDate: Int
     let video: Bool
     let audio: Bool
@@ -58,10 +49,10 @@ struct Stream: Decodable {
     let locked: Bool
     let recent: Int
     let interruptTime: Int
-    let epg: EPG
+    let epg: Epg
     let archive: Bool
     
-    private enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case id
         case groups
         case iarc
@@ -82,14 +73,14 @@ struct Stream: Decodable {
     }
 }
 
-struct EPG: Decodable {
+struct Epg: Decodable {
     let id: String
     let urls: [String]
     let displayName: String
     let icon: String
-    let programs: [Program]
+    let programs: [String]
     
-    private enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case id
         case urls
         case displayName = "display_name"
@@ -98,4 +89,12 @@ struct EPG: Decodable {
     }
 }
 
-// Other structs like Playlist, Vod, Episode, Season, Serial, Group, Part, and Meta can be defined in a similar way
+struct Data1: Decodable {
+    let packages: [Package]
+    let playlists: [String]
+}
+
+struct JSONData: Decodable {
+    let data: Data1
+}
+
