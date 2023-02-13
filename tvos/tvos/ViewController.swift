@@ -19,6 +19,11 @@ class ViewController: UIViewController {
             SocketManager.shared.clientGetContent { cont in
                 print(cont as Any)
             }
+            
+            SocketManager.shared.clientGetProfile { Info in
+                print(Info as Any)
+            }
+            
         }
     }
 

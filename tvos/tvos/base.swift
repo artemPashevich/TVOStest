@@ -49,13 +49,13 @@ class SocketManager {
         return systemInfo
     }
     
-    func generateJsonHeadersWithCode(code: String) -> [String: String] {
-        return [
-            "content-type": "application/json",
-            "accept": "application/json",
-            "Authorization": "Code \(code)"
-        ]
-    }
+//    func generateJsonHeadersWithCode(code: String) -> [String: String] {
+//        return [
+//            "content-type": "application/json",
+//            "accept": "application/json",
+//            "Authorization": "Code \(code)"
+//        ]
+//    }
 
     func generateJsonHeaders(login: String, password: String) -> [String: String] {
         let encodedData = Data("\(login):\(password)".utf8).base64EncodedString()
@@ -136,7 +136,10 @@ class SocketManager {
     }
     
     
+    
+    
     func updateAccessToken(login: String, password: String, refresh_token: String, completion: @escaping (Tokens?) -> Void) {
+        
         
         let url = URL(string: SocketManager.getBackendEndpoint + "/client/refresh_token")
         let headers = generateJsonHeaders(login: login, password: password)
@@ -181,7 +184,7 @@ class SocketManager {
                     do {
                         let json = try JSON(data: data)
 //                        let decodeContent = try JSONDecoder().decode(JSON.self, from: data)
-                        print(data)
+                        print(json)
                         completion(json)
                         
                     } catch {
@@ -197,7 +200,32 @@ class SocketManager {
         
     }
     
-    
+    func clientGetProfile(completion: @escaping (JSON?) -> Void) {
+        
+        let url = URL(string: SocketManager.getBackendEndpoint + "/client/profile")
+        AF.request(url!, method: .get, headers: HTTPHeaders(_getHeaders()))
+            .responseData { response in
+                switch response.result {
+                case .success(let data):
+
+                    do {
+                        let json = try JSON(data: data)
+//                        let decodeContent = try JSONDecoder().decode(JSON.self, from: data)
+                        print(json)
+                        completion(json)
+                        
+                    } catch {
+                        print(error)
+                        // compl
+                    }
+                    
+                case .failure(let error):
+                    print(error)
+                   // compl
+                }
+            }
+        
+    }
     
     
     
