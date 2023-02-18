@@ -63,10 +63,19 @@ struct DeviceInfo: Codable {
 struct DataJson: Codable {
     var data: Device
 }
-//
+
 struct Device: Codable {
     var device: DeviceInfo
 }
+
+struct GetDataJson: Codable {
+    let data: GetDevice
+}
+
+struct GetDevice: Codable {
+    let devices: [DeviceInfo]
+}
+
 
 struct Tokens: Codable {
     

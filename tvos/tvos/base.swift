@@ -16,6 +16,7 @@ class SocketManager {
 //    static let _API_VERSION = "/panel_pro/api"
     static let getBackendEndpoint = "https://ott.fastotv.com/panel_pro/api"
     
+    var devices: [DeviceInfo] = []
     var _tokens: Tokens?
     var onNeedHelp: (() -> Void)?
     var onTokenChanged: ((Tokens) -> Void)?
@@ -42,12 +43,69 @@ class SocketManager {
         }
     }
     
-    func _info(id: String, name: String) -> SystemInfo {
+    func _info(id: String) -> SystemInfo {
         let os = OS(name: UIDevice.current.name, version: UIDevice.current.systemVersion, arch: UIDevice.current.model, ram_total: 0, ram_free: 0)
-        let project = Project(name: name, version: "1.0.0.1") // version ??
+        let project = Project(name: UIDevice.current.name, version: "1.0.0.1") // version ??
         let systemInfo = SystemInfo(id: id, project: project, os: os, cpu_brand: "TV OS")
         return systemInfo
     }
+    
+    func saveToken(tokens: Tokens) {
+        Settings.setAccessToken(token: tokens)
+        Settings.setRefreshToken(token: tokens)
+    }
+    
+    func getDevice() -> String? {
+        return UIDevice.current.name
+    }
+    
+    func getId() -> String {
+        var id = ""
+        for device in devices {
+            if (device.name == getDevice()) {
+                id = device.id
+            }
+        }
+        return id
+    }
+    
+//    func signUp(accessToken: String?, refreshToken: String?, device: String?) {
+//        if (accessToken != nil && refreshToken != nil && device != nil) {
+//            let tokens = Tokens(refresh_token: refreshToken!, access_token: accessToken!)
+//            setTokens(tokens: tokens)
+//            // next get server info !!!!!
+//        }
+//
+//    }
+    
+    func LOGIN(accessToken: String, refreshToken: String, login: String, password: String, device: String) -> Bool {
+        if(accessToken == "" && refreshToken == "") {
+            
+            if(device == "") {
+                
+                addDevice(login: login, password: password) { device in
+                    self.devices.append(device!)
+                    Settings.setDevice()
+                }
+                
+                postClientLogin(login: login, password: password, deviceId: getId()) { result, error in
+                    self.saveToken(tokens: result)
+                }
+                return true
+            } else {
+                postClientLogin(login: login, password: password, deviceId: getId()) { result, error in
+                    self.saveToken(tokens: result)
+                }
+                return true
+            }
+            
+        } else {
+            return true
+        }
+    }
+    
+    
+    
     
 //    func generateJsonHeadersWithCode(code: String) -> [String: String] {
 //        return [
@@ -57,6 +115,32 @@ class SocketManager {
 //        ]
 //    }
 
+    
+    func getDevices(login: String, password: String, callback: @escaping (_ result: [DeviceInfo], _ error: Error?) -> Void) {
+        
+        let url = URL(string: SocketManager.getBackendEndpoint + "/client/devices")
+        
+        AF.request(url!, method: .get, encoding: JSONEncoding.default, headers: HTTPHeaders(self.generateJsonHeaders(login: login, password: password)))
+                .responseData { response in
+                    switch response.result {
+                    case .success(let data):
+                        
+                        do {
+                            let devicesJson = try JSONDecoder().decode(GetDataJson.self, from: data)
+                            let devices = devicesJson.data.devices
+                            callback(devices, nil)
+                        } catch {
+                            print(error)
+//                            callback(nil, nil)
+                        }
+                    case .failure(let error):
+                        print(error)
+                        //
+                        break
+                    }
+                }
+    }
+    
     func generateJsonHeaders(login: String, password: String) -> [String: String] {
         let encodedData = Data("\(login):\(password)".utf8).base64EncodedString()
         return [
@@ -67,17 +151,14 @@ class SocketManager {
     }
     
     
-    func postClientLogin(login: String, password: String, callback: @escaping (_ result: Tokens, _ error: Error?) -> Void) {
+    func postClientLogin(login: String, password: String, deviceId: String, callback: @escaping (_ result: Tokens, _ error: Error?) -> Void) {
         
         let url = URL(string: SocketManager.getBackendEndpoint + "/client/login")
         
-        addDevice(login: login, password: password, name: "TV OS") { device in
-            
-            let encodeBody = self._info(id: "63e544a32a3b9920437dc9d8" , name: "TV OS")
+            let encodeBody = self._info(id: deviceId)
             let data = try? JSONEncoder().encode(encodeBody)
             let parameters = try? (JSONSerialization.jsonObject(with: data!, options: []) as! [String: Any])
             
-
             AF.request(url!, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: HTTPHeaders(self.generateJsonHeaders(login: login, password: password)))
                     .responseData { response in
                         switch response.result {
@@ -98,20 +179,17 @@ class SocketManager {
                             break
                         }
                     }
-        }
+        
     }
     
-    
-    
         
-    func addDevice(login: String, password: String, name: String, completion: @escaping (DeviceInfo?) -> Void) {
+    func addDevice(login: String, password: String, completion: @escaping (DeviceInfo?) -> Void) {
         
         let url = URL(string: SocketManager.getBackendEndpoint + "/client/devices/add")
         let headers = generateJsonHeaders(login: login, password: password)
-        let parameters: Dictionary = ["name": name]
-       
-        
-        AF.request(url!, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: HTTPHeaders(headers))
+        let parameters: Dictionary = ["name": getDevice()]
+        Settings.setDevice()
+        AF.request(url!, method: .post, parameters: parameters as Parameters, encoding: JSONEncoding.default, headers: HTTPHeaders(headers))
             .responseData { response in
                 switch response.result {
                 case .success(let data):
@@ -120,6 +198,7 @@ class SocketManager {
                         let decodeDevice = try JSONDecoder().decode(DataJson.self, from: data)
                         let device = decodeDevice.data.device
                         let deviceInfo = DeviceInfo.fromJson(json: [DeviceInfo.ID_FIELD: device.id, DeviceInfo.NAME_FIELD: device.name])
+                        
                         completion(deviceInfo)
                         
                     } catch {
@@ -197,7 +276,6 @@ class SocketManager {
                    // compl
                 }
             }
-        
     }
     
     func clientGetProfile(completion: @escaping (JSON?) -> Void) {
@@ -224,7 +302,6 @@ class SocketManager {
                    // compl
                 }
             }
-        
     }
     
     
@@ -238,129 +315,5 @@ class SocketManager {
     }
     
     
-    
-//    func login(id: String, name: String, login: String, password: String) {
-//
-//         var allTokens = [String: Any]()
-//
-//        let encodeBody: Dictionary = _info(did: id, name: name)
-//        let url = URL(string: Fetcher.getBackendEndpoint + "/client/login")
-//        let headersOld = generateJsonHeaders(login: login, password: password)
-//        let parameters = [
-//                "id": "63e50a432a3b9920437dc9d5",
-//                "project": [
-//                    "name": "TV OS",
-//                    "version": "1.4.6"
-//                ],
-//                "os": [
-//                    "name": "Volodyz",
-//                    "version": "Mozilla",
-//                    "arch": "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.61",
-//                    "ram_total": 0,
-//                    "ram_free": 0
-//                ],
-//                "cpu_brand": "Netscape"
-//            ] as [String : Any]
-//
-//        AF.request(url!, method: .post, parameters: encodeBody, encoding: JSONEncoding.default, headers: HTTPHeaders(headersOld)).responseData { response in
-//            switch response.result {
-//            case .success(let data):
-//                let utf8Text = String(data: data, encoding: .utf8)
-//                print("Response: \(utf8Text)")
-//                print("encodeBody: \(encodeBody)")
-//                print("Headers: \(headersOld)")
-//                print("URL: \(url!)")
-//                do {
-//                    let tokenJson = try JSONDecoder().decode(DataTokens.self, from: data)
-//                    let token = tokenJson.data
-//                    allTokens = [Tokens.refreshToken: token.refresh, Tokens.accessToken: token.access]
-//                    print(allTokens)
-//                } catch {
-//                    print(error)
-//        //            completion(nil)
-//                }
-//            case .failure(let error):
-//            print(error)
-//            break
-//            }
-//        }
-//
-//         print(allTokens)
-//     }
-
-//    func getLogin() {
-//         var allTokens = [String: Any]()
-//
-//      //  let encodeBody: Dictionary = info(id: id, name: name)
-//        let url = URL(string: Fetcher.getBackendEndpoint + "/client/login")
-//        let encodeBody: Dictionary = _info(id: "63e50a432a3b9920437dc9d5", name: "TV OS")
-//        let headersOld = generateJsonHeaders(login: "test@crocott.com", password: "1111")
-//
-//        let parameters = [
-//            "id": "63e50a432a3b9920437dc9d5",
-//            "project": [
-//                "name": "test",
-//                "version": "1.4.6"
-//            ],
-//            "os": [
-//                "name": "TV OS",
-//                "version": "Mozilla",
-//                "arch": "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.61",
-//                "ram_total": 0,
-//                "ram_free": 0
-//            ],
-//            "cpu_brand": "Netscape"
-//        ] as [String : Any]
-//
-//        AF.request(url!, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: HTTPHeaders(headersOld)).responseData { response in
-//            switch response.result {
-//            case .success(let data):
-//                let utf8Text = String(data: data, encoding: .utf8)
-//                print("Response: \(utf8Text)")
-//                print("encodeBody: \(encodeBody)")
-//                print("Headers: \(headersOld)")
-//                print("URL: \(url!)")
-//                do {
-//                    let tokenJson = try JSONDecoder().decode(DataTokens.self, from: data)
-//                    let token = tokenJson.data
-//                    allTokens = [Tokens.refreshToken: token.refresh_token, Tokens.accessToken: token.access_token]
-//                    print(allTokens)
-//                } catch {
-//                    print(error)
-//        //            completion(nil)
-//                }
-//            case .failure(let error):
-//            print(error)
-//            break
-//            }
-//        }
-//
-//         print(allTokens)
-//     }
-
-    
-//    func httpGet(url: URL, headers: [String: String], completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
-//        var request = URLRequest(url: url)
-//        request.allHTTPHeaderFields = headers
-//
-//        URLSession.shared.dataTask(with: request) { data, response, error in
-//            completion(data, response, error)
-//        }.resume()
-//    }
-
-//    let url = URL(string: getBackendEndpoint)!
-//
-//    let resp: () = httpGet(url: url, headers: generateJsonHeaders(login: login, password: password)) { data, response, error in
-//        if let data = data {
-//            print("Data: \(String(data: data, encoding: .utf8)!)")
-//        }
-//
-//        if let response = response {
-//            print("Response: \(response)")
-//        }
-//        if let error = error {
-//            print("Error: \(error)")
-//        }
-//    }
     
 }
