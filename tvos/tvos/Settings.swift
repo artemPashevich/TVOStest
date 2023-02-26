@@ -10,16 +10,16 @@ import UIKit
 
 final class Settings {
     
-    static func getRefreshToken() -> String {
-        return UserDefaults.standard.string(forKey: SettingsKeys.refresh_token.rawValue) ?? ""
+    static func getRefreshToken() -> String? {
+        return UserDefaults.standard.string(forKey: SettingsKeys.refresh_token.rawValue) ?? nil
     }
     
-    static func getAccessToken() -> String {
-        return UserDefaults.standard.string(forKey: SettingsKeys.access_token.rawValue) ?? ""
+    static func getAccessToken() -> String? {
+        return UserDefaults.standard.string(forKey: SettingsKeys.access_token.rawValue) ?? nil
     }
     
-    static func getDevice() -> String {
-        return UserDefaults.standard.string(forKey: SettingsKeys.device.rawValue) ?? ""
+    static func getID() -> String? {
+        return UserDefaults.standard.string(forKey: SettingsKeys.ID.rawValue) ?? nil
     }
     
    static func setRefreshToken(token: Tokens) {
@@ -32,15 +32,15 @@ final class Settings {
         defaults.set(token.access_token, forKey: SettingsKeys.access_token.rawValue)
     }
     
-    static func setDevice() {
+    static func setID(id: String) {
          let defaults = UserDefaults.standard
-         defaults.set(UIDevice.current.name, forKey: SettingsKeys.device.rawValue)
+         defaults.set(id, forKey: SettingsKeys.ID.rawValue)
      }
     
     private enum SettingsKeys: String {
         case access_token
         case refresh_token
-        case device
+        case ID
     }
     
 }

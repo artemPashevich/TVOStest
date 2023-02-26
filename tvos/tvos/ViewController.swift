@@ -9,6 +9,19 @@ import UIKit
 
 class ViewController: UIViewController {
 
+    @IBOutlet weak var email: UITextField!
+    
+    @IBOutlet weak var password: UITextField!
+    
+    
+    
+    @IBAction func next(_ sender: Any) {
+        SocketManager.shared.loginWithPassword(email: "test@crocott.com", password: "1111", device: Settings.getID())
+    }
+    
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -29,23 +42,36 @@ class ViewController: UIViewController {
 //        SocketManager.shared.getDevices(login: "test@crocott.com", password: "1111") { result, error in
 //            print(result)
 //        }
-        
-        
-        SocketManager.shared.getDevices(login: "test@crocott.com", password: "1111") { result, error in
-            SocketManager.shared.devices = result
-            for device in SocketManager.shared.devices {
-                if (device.name == SocketManager.shared.getDevice()) {
-                    Settings.setDevice()
-                }
-            }
-            if ( SocketManager.shared.LOGIN(accessToken: Settings.getAccessToken(), refreshToken: Settings.getRefreshToken(), login: "test@crocott.com", password: "1111", device: Settings.getDevice())  ) {
-                print("Good")
-            }
+        if let bundleID = Bundle.main.bundleIdentifier {
+            UserDefaults.standard.removePersistentDomain(forName: bundleID)
         }
+
         
+    
+//        SocketManager.shared.getDevices(login: "test@crocott.com", password: "1111") { result, error in
+//            print(Settings.getID())
+//            print(Settings.getRefreshToken())
+//            print(Settings.getAccessToken())
+//            SocketManager.shared.devices = result
+//            for device in SocketManager.shared.devices {
+//                if (device.name == SocketManager.shared.getDevice()) {
+//                    print(device)
+//
+//                }
+//            }
+//            SocketManager.shared.LOGIN(accessToken: Settings.getAccessToken(), refreshToken: Settings.getRefreshToken(), login: "test@crocott.com", password: "1111", id: Settings.getID()) { result in
+//                print(result)
+//            }
+                
+            
+            
+//        }
         
-        
-        
+//        SocketManager.shared.loginWithPassword(email: email.text!, password: password.text!, device: Settings.getID())
+//        
+//        SocketManager.shared.clientGetProfile { json in
+//            print(json)
+//        }
         
         
         

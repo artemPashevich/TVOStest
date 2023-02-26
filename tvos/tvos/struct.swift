@@ -7,6 +7,35 @@
 
 import Foundation
 
+struct Response: Decodable {
+    let data: Data2
+}
+
+struct Data2: Decodable {
+    let providersCount: Int
+    let brand: Brand
+    let exp: Int
+    private enum CodingKeys: String, CodingKey {
+        case providersCount = "providers_count"
+        case brand, exp
+    }
+}
+
+struct Brand: Decodable {
+    let title: String
+    let logo: String
+    let landing: String
+    let theme: Int
+    let mode: Int
+    let platforms: [Platform]
+}
+
+struct Platform: Decodable {
+    let os: String
+    let url: String
+}
+
+
 struct DataTokens: Codable {
     let data: Tokens
 }
@@ -74,6 +103,15 @@ struct GetDataJson: Codable {
 
 struct GetDevice: Codable {
     let devices: [DeviceInfo]
+}
+
+struct ErrorJson: Codable {
+    let error: ErrorDetail
+}
+
+struct ErrorDetail: Codable {
+    let code: Int
+    let message: String
 }
 
 
